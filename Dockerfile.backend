@@ -1,0 +1,55 @@
+# Multi-stage build için base image
+FROM node:20-alpine AS base
+
+# Güvenlik ve performans için gerekli paketler
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Development stage
+FROM base AS development
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=development && npm cache clean --force
+COPY backend/ ./
+EXPOSE 3000
+USER node
+CMD ["dumb-init", "npm", "run", "dev"]
+
+# Production dependencies stage
+FROM base AS production-deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Production stage
+FROM base AS production
+WORKDIR /app
+
+# Production ortamı için optimize edilmiş ayarlar
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
+# Non-root user oluştur
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
+
+# Dependencies'leri kopyala
+COPY --from=production-deps --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Backend kodunu kopyala
+COPY --chown=nodejs:nodejs backend/ ./
+
+# Healthcheck ekle
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Port expose et
+EXPOSE 3000
+
+# Non-root user olarak çalıştır
+USER nodejs
+
+# Graceful shutdown için dumb-init kullan
+CMD ["dumb-init", "node", "server.js"] 

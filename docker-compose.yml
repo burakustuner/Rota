@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with PostGIS
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: rota_postgres
+    environment:
+      POSTGRES_DB: rota_db
+      POSTGRES_USER: rota_user
+      POSTGRES_PASSWORD: rota_password123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=tr_TR.UTF-8 --lc-ctype=tr_TR.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - rota_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rota_user -d rota_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: rota_redis
+    command: redis-server --appendonly yes --requirepass rota_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - rota_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        NODE_ENV: production
+    container_name: rota_backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: rota_db
+      DB_USER: rota_user
+      DB_PASSWORD: rota_password123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: rota_redis_password
+      JWT_SECRET: rota_jwt_secret_key_2024_ultra_secure
+      JWT_EXPIRES_IN: 7d
+      ONEID_CLIENT_ID: ${ONEID_CLIENT_ID:-your_oneid_client_id}
+      ONEID_CLIENT_SECRET: ${ONEID_CLIENT_SECRET:-your_oneid_client_secret}
+      ONEID_REDIRECT_URI: ${ONEID_REDIRECT_URI:-http://localhost:3000/auth/oneid/callback}
+      API_RATE_LIMIT: 100
+      WEBSOCKET_PING_TIMEOUT: 60000
+      WEBSOCKET_PING_INTERVAL: 25000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - rota_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Nginx (Opsiyonel - Production için)
+  nginx:
+    image: nginx:alpine
+    container_name: rota_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+    networks:
+      - rota_network
+    profiles:
+      - production
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  rota_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 

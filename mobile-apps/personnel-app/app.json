@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Rota Personel",
+    "slug": "rota-personnel-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF9800"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rota.personnel",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Bu uygulama araç konumlarını görmek için konum bilginizi kullanır."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#FF9800"
+      },
+      "package": "com.rota.personnel",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/logo.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Bu uygulama araç konumlarını görmek için konum bilginizi kullanır."
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:3000"
+    },
+    "sdkVersion": "53.0.0"
+  }
+} 

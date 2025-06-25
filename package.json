@@ -1,0 +1,77 @@
+{
+  "name": "rota-takip-sistemi",
+  "version": "1.0.0",
+  "description": "Servis Takip Sistemi - Şoför ve Personel Uygulamaları",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon backend/server.js",
+    "start": "node backend/server.js",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "db:migrate": "node backend/migrations/migrate.js",
+    "mobile:install": "npm run mobile:driver:install && npm run mobile:personnel:install",
+    "mobile:driver:install": "cd mobile-apps/driver-app && npm install",
+    "mobile:personnel:install": "cd mobile-apps/personnel-app && npm install",
+    "mobile:driver:start": "cd mobile-apps/driver-app && npm start",
+    "mobile:personnel:start": "cd mobile-apps/personnel-app && npm start",
+    "mobile:driver:android": "cd mobile-apps/driver-app && npm run android",
+    "mobile:personnel:android": "cd mobile-apps/personnel-app && npm run android",
+    "mobile:driver:build": "cd mobile-apps/driver-app && npm run build:android",
+    "mobile:personnel:build": "cd mobile-apps/personnel-app && npm run build:android",
+    "setup": "npm install && npm run mobile:install",
+    "setup:full": "npm run setup && npm run docker:up",
+    "health": "curl -f http://localhost:3000/health || exit 1"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "dotenv": "^16.4.5",
+    "pg": "^8.12.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "socket.io": "^4.8.1",
+    "redis": "^4.7.0",
+    "axios": "^1.7.4",
+    "express-rate-limit": "^7.4.0",
+    "morgan": "^1.10.0",
+    "uuid": "^10.0.0",
+    "joi": "^17.13.3",
+    "compression": "^1.7.4",
+    "express-validator": "^7.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "@types/node": "^22.5.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "tracking", 
+    "gps", 
+    "react-native", 
+    "expo", 
+    "sdk-53",
+    "nodejs", 
+    "postgresql", 
+    "postgis",
+    "websocket",
+    "real-time"
+  ],
+  "author": "Rota Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rota-team/rota-takip-sistemi"
+  },
+  "bugs": {
+    "url": "https://github.com/rota-team/rota-takip-sistemi/issues"
+  },
+  "homepage": "https://github.com/rota-team/rota-takip-sistemi#readme"
+} 

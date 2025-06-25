@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Rota Şoför",
+    "slug": "rota-driver-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2196F3"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rota.driver",
+      "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Bu uygulama servis takibi için konum bilginizi kullanır.",
+        "NSLocationWhenInUseUsageDescription": "Bu uygulama servis takibi için konum bilginizi kullanır.",
+        "NSLocationAlwaysUsageDescription": "Bu uygulama arka planda da servis takibi yapabilmek için konum bilginizi kullanır."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#2196F3"
+      },
+      "package": "com.rota.driver",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/logo.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Bu uygulama servis takibi için konum bilginizi kullanır.",
+          "locationWhenInUsePermission": "Bu uygulama servis takibi için konum bilginizi kullanır."
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:3000"
+    },
+    "sdkVersion": "53.0.0"
+  }
+} 
