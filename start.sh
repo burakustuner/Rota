@@ -71,7 +71,7 @@ check_docker() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    if ! docker compose version &> /dev/null; then
         log_error "Docker Compose kurulu değil! Lütfen Docker Compose'u kurun."
         exit 1
     fi
@@ -184,10 +184,10 @@ start_docker_services() {
     log_docker "Docker servisleri başlatılıyor..."
     
     # Eski container'ları temizle
-    docker-compose down -v 2>/dev/null
+    docker compose down -v 2>/dev/null
     
     # Yeni container'ları başlat
-    docker-compose up -d --build
+    docker compose up -d --build
     
     if [ $? -eq 0 ]; then
         log_success "Docker servisleri başlatıldı"
@@ -292,11 +292,11 @@ show_mobile_info() {
     echo "  # veya: npm run mobile:personnel:start"
     echo ""
     log_info "🔧 Geliştirme Komutları:"
-    echo "  - Backend logs: docker-compose logs -f backend"
-    echo "  - Database logs: docker-compose logs -f postgres"
-    echo "  - Tüm servisler: docker-compose logs -f"
-    echo "  - Servisleri durdur: docker-compose down"
-    echo "  - Verileri temizle: docker-compose down -v"
+    echo "  - Backend logs: docker compose logs -f backend"
+    echo "  - Database logs: docker compose logs -f postgres"
+    echo "  - Tüm servisler: docker compose logs -f"
+    echo "  - Servisleri durdur: docker compose down"
+    echo "  - Verileri temizle: docker compose down -v"
     echo ""
     log_info "🌐 Erişim URL'leri:"
     echo "  - API: http://localhost:3000"
