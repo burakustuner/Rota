@@ -9,20 +9,35 @@ class SocketService {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
     this.reconnectInterval = 3000;
-    this.baseURL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000';
+    // Cache problemini bypass etmek için hard-coded IP
+    this.baseURL = 'http://192.168.0.201:3000';
   }
 
   async connect() {
+    console.log('🔌 Socket bağlantısı başlatılıyor...');
+    console.log('🌐 Base URL:', this.baseURL);
+    
     try {
-      if (this.socket?.connected) {
-        console.log('Socket zaten bağlı');
-        return;
+      // Önceki bağlantıları temizle
+      if (this.socket) {
+        console.log('🧹 Önceki socket bağlantısı temizleniyor...');
+        this.socket.disconnect();
+        this.socket = null;
+        this.isConnected = false;
       }
 
       const token = await AsyncStorage.getItem('auth_token');
+      console.log('🔑 Token alındı:', token ? 'Mevcut' : 'Yok');
+      
       if (!token) {
         throw new Error('Auth token bulunamadı');
       }
+
+      console.log('⚙️ Socket.IO konfigürasyonu:', {
+        baseURL: this.baseURL,
+        transports: ['websocket', 'polling'],
+        timeout: 5000
+      });
 
       this.socket = io(this.baseURL, {
         auth: {
@@ -34,6 +49,8 @@ class SocketService {
         reconnectionDelay: this.reconnectInterval,
         reconnectionAttempts: this.maxReconnectAttempts
       });
+      
+      console.log('📡 Socket instance oluşturuldu');
 
       this.setupEventListeners();
       

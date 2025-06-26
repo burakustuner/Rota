@@ -4,7 +4,7 @@ import axios from 'axios';
 
 class VehicleService {
   constructor() {
-    this.baseURL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000';
+    this.baseURL = Constants.expoConfig?.extra?.apiUrl || 'http://192.168.0.201:3000';
     this.api = axios.create({
       baseURL: this.baseURL,
       timeout: 10000,

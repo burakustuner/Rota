@@ -5,6 +5,91 @@ const db = require('../config/database');
 
 const router = express.Router();
 
+// Test için basit giriş (OneID olmadan)
+router.post('/test/login', async (req, res) => {
+  try {
+    const { email, user_type = 'driver' } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email gerekli'
+      });
+    }
+
+    // Test kullanıcısı oluştur/bul
+    let userResult = await db.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+
+    let user;
+    if (userResult.rows.length === 0) {
+      // Yeni test kullanıcısı oluştur
+      const insertResult = await db.query(`
+        INSERT INTO users (email, full_name, user_type, status, oneid_user_id)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [
+        email,
+        'Test User',
+        user_type,
+        'active',
+        'test_' + Date.now() // Test için dummy oneid_user_id
+      ]);
+      user = insertResult.rows[0];
+    } else {
+      user = userResult.rows[0];
+    }
+
+    // JWT token oluştur
+    const jwtToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        user_type: user.user_type,
+        oneid_user_id: user.oneid_user_id
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    // Şoför ise araç bilgisini de getir
+    let vehicle = null;
+    if (user.user_type === 'driver') {
+      const vehicleResult = await db.query(
+        'SELECT * FROM vehicles WHERE driver_id = $1 AND status = $2',
+        [user.id, 'active']
+      );
+      vehicle = vehicleResult.rows[0] || null;
+    }
+
+    res.json({
+      success: true,
+      message: 'Test girişi başarılı',
+      data: {
+        token: jwtToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          phone: user.phone,
+          user_type: user.user_type,
+          profile_photo_url: user.profile_photo_url
+        },
+        vehicle: vehicle
+      }
+    });
+
+  } catch (error) {
+    console.error('Test giriş hatası:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Test girişi sırasında hata oluştu'
+    });
+  }
+});
+
 // OneID ile giriş
 router.post('/oneid/login', async (req, res) => {
   try {

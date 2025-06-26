@@ -32,6 +32,29 @@ export default function LoginScreen({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
 
+  const handleTestLogin = async () => {
+    try {
+      setLoading(true);
+      
+      // Test login
+      const userData = await AuthService.testLogin('test@driver.com', 'driver');
+      
+      Alert.alert(
+        'Test Girişi Başarılı',
+        'Test şoför hesabıyla giriş yapıldı!',
+        [{ text: 'Tamam', onPress: () => onLogin(userData) }]
+      );
+    } catch (error) {
+      console.error('Test giriş hatası:', error);
+      Alert.alert(
+        'Test Giriş Hatası',
+        error.message || 'Test girişi yapılırken bir hata oluştu'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOneIdLogin = async () => {
     try {
       setLoading(true);
@@ -117,11 +140,22 @@ export default function LoginScreen({ onLogin }) {
           <Card.Content style={styles.cardContent}>
             <Title style={styles.cardTitle}>Giriş Yapın</Title>
             <Paragraph style={styles.cardSubtitle}>
-              OneID hesabınızla giriş yaparak servis takibini başlatın
+              Test girişi ile hızlıca deneyebilir veya OneID hesabınızla giriş yapabilirsiniz
             </Paragraph>
 
             <Button
               mode="contained"
+              onPress={handleTestLogin}
+              disabled={loading}
+              style={[styles.loginButton, { backgroundColor: '#4CAF50' }]}
+              contentStyle={styles.loginButtonContent}
+              icon="account-check"
+            >
+              {loading ? 'Giriş yapılıyor...' : 'Test Şoför Girişi'}
+            </Button>
+
+            <Button
+              mode="outlined"
               onPress={handleOneIdLogin}
               disabled={loading}
               style={styles.loginButton}
@@ -141,14 +175,9 @@ export default function LoginScreen({ onLogin }) {
 
         <View style={styles.infoContainer}>
           <Paragraph style={styles.infoText}>
-            📍 Giriş yaptıktan sonra konum takibi otomatik olarak başlayacaktır
+            📍 Giriş yaptıktan sonra size atanmış servis aracının konum takibi otomatik olarak başlayacaktır
           </Paragraph>
-          <Paragraph style={styles.infoText}>
-            🚌 Size atanmış servis aracının takibini yapabileceksiniz
-          </Paragraph>
-          <Paragraph style={styles.infoText}>
-            📊 Günlük seyahat istatistiklerinizi görebileceksiniz
-          </Paragraph>
+
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
